@@ -1,0 +1,22 @@
+.auth-container {
+  width: 350px;
+  margin: 80px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+.auth-container h2 {
+  margin-bottom: 20px;
+}
+
+.auth-container a {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.auth-container a:hover {
+  text-decoration: underline;
+}

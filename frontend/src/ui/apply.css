@@ -1,0 +1,47 @@
+.apply-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+  background: #f4f6f9;
+}
+
+.apply-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  padding: 30px 35px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.apply-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.apply-card input,
+.apply-card textarea {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+}
+
+.apply-card textarea {
+  resize: none;
+}
+
+.apply-card button {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}

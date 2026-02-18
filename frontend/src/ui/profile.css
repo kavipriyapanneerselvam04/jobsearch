@@ -1,0 +1,88 @@
+.profile-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.profile-card {
+  width: 520px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.profile-header {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role {
+  background: #e0ecff;
+  color: #2563eb;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.email {
+  color: #666;
+  font-size: 14px;
+}
+
+.profile-section {
+  margin-bottom: 20px;
+}
+
+.profile-section h4 {
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.resume-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f5f9ff;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.view-btn {
+  background: #2563eb;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.view-btn:hover {
+  background: #1e40af;
+}
+
+.no-resume {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 18px;
+}
