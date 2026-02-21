@@ -14,18 +14,15 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* AUTH */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* USER */}
         <Route path="/user" element={<UserDashboard />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/apply/:jobId" element={<ApplyJob />} />
         <Route path="/upload-resume" element={<UploadResume />} />
 
-        {/* RECRUITER */}
         <Route path="/recruiter" element={<RecruiterDashboard />} />
         <Route path="/post-job" element={<PostJob />} />
       </Routes>

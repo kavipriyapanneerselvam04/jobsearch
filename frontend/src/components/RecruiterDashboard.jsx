@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../ui/dashboard.css";
 import "../ui/common.css";
@@ -10,45 +10,84 @@ function RecruiterDashboard() {
   const [skills, setSkills] = useState("");
   const [description, setDescription] = useState("");
 
-  const [candidates, setCandidates] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [applications, setApplications] = useState([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [processingId, setProcessingId] = useState(null);
+  const [reasonById, setReasonById] = useState({});
 
-  const postJob = async () => {
+  const fetchApplications = async () => {
+    if (!recruiterId) return;
+
+    setLoadingApplications(true);
     try {
-      await api.post("/api/jobs/add", {
-        recruiter_id: recruiterId,
-        title,
-        skills,
-        description
-      });
-
-      alert("Job posted successfully ✅");
-
-      // Reset fields
-      setTitle("");
-      setSkills("");
-      setDescription("");
-      setCandidates([]);
-      setSearched(false);
-
-    } catch {
-      alert("Failed to post job");
+      const res = await api.get(`/api/jobs/applications/recruiter/${recruiterId}`);
+      setApplications(res.data || []);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load applications");
+    } finally {
+      setLoadingApplications(false);
     }
   };
 
-  const viewMatches = async () => {
-    setLoading(true);
-    setSearched(true);
+  useEffect(() => {
+    fetchApplications();
+  }, [recruiterId]);
+
+  const postJob = async () => {
+    if (!title.trim() || !skills.trim() || !description.trim()) {
+      alert("Please fill all job fields");
+      return;
+    }
 
     try {
-      const res = await api.get(`/api/jobs/match/${recruiterId}`);
-      setCandidates(res.data);
-    } catch {
-      alert("Failed to fetch matched candidates");
-    } finally {
-      setLoading(false);
+      await api.post("/api/jobs/add", {
+        recruiter_id: recruiterId,
+        title: title.trim(),
+        skills: skills.trim(),
+        description: description.trim(),
+      });
+
+      alert("Job posted successfully");
+      setTitle("");
+      setSkills("");
+      setDescription("");
+      fetchApplications();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to post job");
     }
+  };
+
+  const updateApplication = async (applicationId, status) => {
+    const reason = (reasonById[applicationId] || "").trim();
+
+    if (status === "DECLINED" && !reason) {
+      alert("Please enter reason before declining.");
+      return;
+    }
+
+    try {
+      setProcessingId(applicationId);
+
+      const res = await api.put(`/api/jobs/applications/${applicationId}/status`, {
+        recruiter_id: Number(recruiterId),
+        status,
+        status_reason: status === "DECLINED" ? reason : "",
+      });
+
+      alert(res.data?.message || "Application status updated");
+      fetchApplications();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to update application");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const onReasonChange = (applicationId, value) => {
+    setReasonById((prev) => ({ ...prev, [applicationId]: value }));
   };
 
   const logout = () => {
@@ -57,10 +96,9 @@ function RecruiterDashboard() {
   };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard recruiter-page">
       <h2>Recruiter Dashboard</h2>
 
-      {/* Add Job Section */}
       <div className="form-grid">
         <input
           placeholder="Job Title"
@@ -83,31 +121,80 @@ function RecruiterDashboard() {
 
       <div className="btn-group">
         <button onClick={postJob}>Post Job</button>
-        <button onClick={viewMatches}>View Matched Candidates</button>
+        <button onClick={fetchApplications}>Refresh Applications</button>
         <button className="danger" onClick={logout}>Logout</button>
       </div>
 
-      {/* Matched Candidates Section */}
-      <h3>Matched Candidates</h3>
+      <h3>Received Applications</h3>
 
-      {loading && <p className="info">🔍 Searching matching candidates...</p>}
+      {loadingApplications && <p className="info">Loading applications...</p>}
 
-      {!loading && searched && candidates.length === 0 && (
+      {!loadingApplications && applications.length === 0 && (
         <div className="empty-state">
-          <p>❌ No candidates matched yet</p>
-          <small>Wait for users to upload resumes or adjust job skills</small>
+          <p>No applications received yet</p>
+          <small>Applications will appear here once candidates apply.</small>
         </div>
       )}
 
-      <div className="job-grid">
-        {candidates.map((user) => (
-          <div className="job-card" key={user.id}>
-            <h4>{user.name}</h4>
-            <p><b>Email:</b> {user.email}</p>
-            <p><b>Skills:</b> {user.skills}</p>
-            <p><b>Experience:</b> {user.experience} years</p>
-          </div>
-        ))}
+      <div className="application-grid">
+        {applications.map((app) => {
+          const statusClass =
+            app.status === "ACCEPTED"
+              ? "status-accepted"
+              : app.status === "DECLINED"
+              ? "status-declined"
+              : "status-pending";
+
+          return (
+            <div className="application-card" key={app.id}>
+              <div className="application-top">
+                <h4>{app.name}</h4>
+                <span className={`status-pill ${statusClass}`}>{app.status}</span>
+              </div>
+
+              <p><b>Job:</b> {app.job_title}</p>
+              <p><b>Email:</b> {app.email}</p>
+              <p><b>Phone:</b> {app.phone}</p>
+              <p><b>Location:</b> {app.location}</p>
+              <p><b>Experience:</b> {app.experience_years} year(s)</p>
+              <p><b>Work Mode:</b> {app.work_mode || "-"}</p>
+              <p><b>Notice Period:</b> {app.notice_period || "-"}</p>
+              <p><b>Expected Salary:</b> {app.expected_salary || "-"}</p>
+              {app.cover_letter ? <p><b>Cover Letter:</b> {app.cover_letter}</p> : null}
+              {app.status_reason ? <p><b>Reason:</b> {app.status_reason}</p> : null}
+
+              {app.status === "PENDING" && (
+                <>
+                  <textarea
+                    className="decision-note"
+                    rows={2}
+                    placeholder="Reason (required only for decline)"
+                    value={reasonById[app.id] || ""}
+                    onChange={(e) => onReasonChange(app.id, e.target.value)}
+                  />
+
+                  <div className="decision-actions">
+                    <button
+                      className="accept-btn"
+                      disabled={processingId === app.id}
+                      onClick={() => updateApplication(app.id, "ACCEPTED")}
+                    >
+                      {processingId === app.id ? "Please wait..." : "Accept"}
+                    </button>
+
+                    <button
+                      className="decline-btn"
+                      disabled={processingId === app.id}
+                      onClick={() => updateApplication(app.id, "DECLINED")}
+                    >
+                      {processingId === app.id ? "Please wait..." : "Decline"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ function UserProfile() {
 
   const [profile, setProfile] = useState(null);
   const [resume, setResume] = useState(null);
+  const [applications, setApplications] = useState([]);
 
   useEffect(() => {
     api.get(`/api/users/profile/${userId}`).then((res) => {
@@ -19,6 +20,15 @@ function UserProfile() {
     api.get(`/api/resume/user/${userId}`).then((res) => {
       setResume(res.data);
     });
+
+    api
+      .get(`/api/jobs/applications/user/${userId}`)
+      .then((res) => {
+        setApplications(res.data || []);
+      })
+      .catch(() => {
+        setApplications([]);
+      });
   }, [userId]);
 
   if (!profile) {
@@ -141,6 +151,30 @@ function UserProfile() {
         ) : (
           <div className="no-resume">No resume uploaded yet. Add one to improve your profile visibility.</div>
         )}
+
+        <div className="profile-section applications-section">
+          <h4>Job Applications</h4>
+          {applications.length === 0 ? (
+            <p className="no-resume">No job applications yet.</p>
+          ) : (
+            <div className="application-status-list">
+              {applications.map((app) => (
+                <div key={app.id} className="application-status-item">
+                  <div className="application-status-top">
+                    <p className="application-job-title">{app.job_title}</p>
+                    <span className={`profile-status-badge profile-${String(app.status || "").toLowerCase()}`}>
+                      {app.status}
+                    </span>
+                  </div>
+                  {app.status === "DECLINED" && app.status_reason ? (
+                    <p className="application-status-reason">Declined because: {app.status_reason}</p>
+                  ) : null}
+                  <p className="application-date">Applied on: {new Date(app.created_at).toLocaleDateString()}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="profile-actions">
           <button className="secondary-btn" onClick={() => navigate("/edit-profile")}>

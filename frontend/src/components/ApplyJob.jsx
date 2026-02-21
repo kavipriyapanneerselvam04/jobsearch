@@ -52,7 +52,7 @@ function ApplyJob() {
     try {
       setLoading(true);
 
-      await api.post("/api/jobs/apply", {
+      const res = await api.post("/api/jobs/apply", {
         user_id: userId,
         job_id: Number(jobId),
         name: form.name,
@@ -69,11 +69,11 @@ function ApplyJob() {
         coverLetter: form.coverLetter,
       });
 
-      alert("Application submitted successfully");
+      alert(res.data?.message || "Successfully applied for this job");
       navigate("/user");
     } catch (err) {
       console.error(err);
-      alert("Failed to apply. Try again.");
+      alert(err.response?.data?.message || err.response?.data?.sqlMessage || "Failed to apply. Try again.");
     } finally {
       setLoading(false);
     }
@@ -246,3 +246,4 @@ function ApplyJob() {
 }
 
 export default ApplyJob;
+

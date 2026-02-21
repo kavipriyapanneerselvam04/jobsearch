@@ -14,7 +14,6 @@
   --primary-dark: #0e4ca4;
   --line: #d7deeb;
   --soft: #f0f5ff;
-  --success: #0a9d76;
 }
 
 .profile-container {
@@ -43,7 +42,7 @@
   margin: 0 0 16px;
   text-align: center;
   color: var(--text-main);
-  font-size: 34px;
+  font-size: 30px;
   letter-spacing: 0.3px;
 }
 
@@ -60,7 +59,7 @@
 .profile-section label {
   display: block;
   margin-bottom: 6px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #263347;
 }
@@ -71,7 +70,7 @@
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 10px 12px;
-  font-size: 18px;
+  font-size: 15px;
   outline: none;
   color: var(--text-main);
   background: #fff;
@@ -170,7 +169,7 @@
 
 .profile-title {
   margin: 0;
-  font-size: 26px;
+  font-size: 24px;
   color: var(--text-main);
 }
 
@@ -340,6 +339,69 @@
   gap: 10px;
 }
 
+.applications-section {
+  margin-top: 14px;
+}
+
+.application-status-list {
+  display: grid;
+  gap: 10px;
+}
+
+.application-status-item {
+  border: 1px solid #dde5f2;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fbfdff;
+}
+
+.application-status-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.application-job-title {
+  margin: 0;
+  font-weight: 700;
+  color: #14213d;
+}
+
+.profile-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.profile-pending {
+  color: #3730a3;
+  background: #eaefff;
+}
+
+.profile-accepted {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.profile-declined {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.application-status-reason {
+  margin: 8px 0 4px;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.application-date {
+  margin: 4px 0 0;
+  color: #5b6475;
+  font-size: 12px;
+}
+
 .edit-subtitle {
   margin: -6px 0 16px;
   text-align: center;
@@ -359,7 +421,7 @@
   }
 
   .profile-card h2 {
-    font-size: 30px;
+    font-size: 26px;
   }
 
   .profile-title {
