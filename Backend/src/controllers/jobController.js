@@ -154,15 +154,15 @@ exports.applyForJob = (req, res) => {
 
       sendEmail({
         to: email,
-        subject: `Application received: ${job.title}`,
-        text: `Hi ${name}, your application for \"${job.title}\" has been received.`
+        subject: `JobSphere: Application received for ${job.title}`,
+        text: `Hi ${name}, your application for \"${job.title}\" has been received successfully on JobSphere.`
       }).catch(() => {});
 
       if (job.recruiter_email) {
         sendEmail({
           to: job.recruiter_email,
-          subject: `New application received for ${job.title}`,
-          text: `Hello ${job.recruiter_name || "Recruiter"}, candidate ${name} (${email}) has applied for ${job.title}.`
+          subject: `JobSphere: You received a new applicant for ${job.title}`,
+          text: `Hi ${job.recruiter_name || "Recruiter"}, you received one new applicant. Candidate ${name} (${email}) applied for ${job.title}.`
         }).catch(() => {});
       }
 
@@ -279,8 +279,8 @@ exports.updateApplicationStatus = (req, res) => {
 
           sendEmail({
             to: info.email,
-            subject: `Application ${status.toLowerCase()}: ${info.job_title}`,
-            text: `Hi ${info.name}, your application for \"${info.job_title}\" is now ${status}.${reasonText}`
+            subject: `JobSphere: Application ${status.toLowerCase()} for ${info.job_title}`,
+            text: `Hi ${info.name}, your application for \"${info.job_title}\" has been ${status.toLowerCase()} on JobSphere.${reasonText}`
           }).catch(() => {});
         }
 

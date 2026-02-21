@@ -9,10 +9,13 @@ import PostJob from "./components/PostJob";
 import UploadResume from "./components/UploadResume";
 import UserProfile from "./components/UserProfile";
 import EditProfile from "./components/EditProfile";
+import ThemeToggle from "./components/ThemeToggle";
+import "./ui/theme.css";
 
 function App() {
   return (
     <BrowserRouter>
+      <ThemeToggle />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />

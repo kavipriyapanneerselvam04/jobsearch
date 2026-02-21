@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "../ui/dashboard.css";
 import "../ui/common.css";
 
 function RecruiterDashboard() {
   const recruiterId = localStorage.getItem("userId");
+  const recruiterName = localStorage.getItem("userName") || "Recruiter";
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [skills, setSkills] = useState("");
   const [description, setDescription] = useState("");
+  const [showPostForm, setShowPostForm] = useState(true);
 
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
@@ -95,34 +99,99 @@ function RecruiterDashboard() {
     window.location.href = "/";
   };
 
+  const deleteAccount = async () => {
+    const ok = window.confirm(
+      "Delete account permanently? This will remove your profile, posted jobs and applications. You can register again later."
+    );
+    if (!ok) return;
+
+    try {
+      const res = await api.delete(`/api/users/delete/${recruiterId}`);
+      alert(res.data?.message || "Account deleted permanently");
+      localStorage.clear();
+      navigate("/register");
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete account");
+    }
+  };
+
+  const pendingCount = applications.filter((a) => a.status === "PENDING").length;
+  const acceptedCount = applications.filter((a) => a.status === "ACCEPTED").length;
+  const declinedCount = applications.filter((a) => a.status === "DECLINED").length;
+
   return (
     <div className="dashboard recruiter-page">
-      <h2>Recruiter Dashboard</h2>
-
-      <div className="form-grid">
-        <input
-          placeholder="Job Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <input
-          placeholder="Required Skills (comma separated)"
-          value={skills}
-          onChange={(e) => setSkills(e.target.value)}
-        />
-
-        <textarea
-          placeholder="Job Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+      <div className="recruiter-hero">
+        <div>
+          <p className="app-badge">JobSphere  🚀</p>
+          <h2>Hi, {recruiterName}</h2>
+          <p className="hero-subtitle">Manage jobs, review applicants, and respond faster.</p>
+        </div>
+        <button
+          className="toggle-btn"
+          onClick={() => setShowPostForm((prev) => !prev)}
+        >
+          {showPostForm ? "Hide Post Job Form" : "Show Post Job Form"}
+        </button>
       </div>
 
-      <div className="btn-group">
-        <button onClick={postJob}>Post Job</button>
-        <button onClick={fetchApplications}>Refresh Applications</button>
-        <button className="danger" onClick={logout}>Logout</button>
+      {showPostForm && (
+        <div className="form-panel">
+          <h3>Create New Job</h3>
+          <div className="form-grid">
+            <input
+              placeholder="Job Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <input
+              placeholder="Required Skills (comma separated)"
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+            />
+
+            <textarea
+              placeholder="Job Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="btn-group">
+            <button onClick={postJob}>Post Job</button>
+            <button onClick={fetchApplications}>Refresh Applications</button>
+            <button className="danger" onClick={logout}>Logout</button>
+            <button className="danger-outline" onClick={deleteAccount}>Delete Account</button>
+          </div>
+        </div>
+      )}
+
+      {!showPostForm && (
+        <div className="btn-group compact-actions">
+          <button onClick={fetchApplications}>Refresh Applications</button>
+          <button className="danger" onClick={logout}>Logout</button>
+          <button className="danger-outline" onClick={deleteAccount}>Delete Account</button>
+        </div>
+      )}
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <span>Total</span>
+          <strong>{applications.length}</strong>
+        </div>
+        <div className="stat-card pending">
+          <span>Pending</span>
+          <strong>{pendingCount}</strong>
+        </div>
+        <div className="stat-card accepted">
+          <span>Accepted</span>
+          <strong>{acceptedCount}</strong>
+        </div>
+        <div className="stat-card declined">
+          <span>Declined</span>
+          <strong>{declinedCount}</strong>
+        </div>
       </div>
 
       <h3>Received Applications</h3>
@@ -148,7 +217,12 @@ function RecruiterDashboard() {
           return (
             <div className="application-card" key={app.id}>
               <div className="application-top">
-                <h4>{app.name}</h4>
+                <div className="candidate-title">
+                  <span className="candidate-avatar">
+                    {String(app.name || "C").charAt(0).toUpperCase()}
+                  </span>
+                  <h4>{app.name}</h4>
+                </div>
                 <span className={`status-pill ${statusClass}`}>{app.status}</span>
               </div>
 

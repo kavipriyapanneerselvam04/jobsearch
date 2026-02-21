@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "../ui/auth.css";
+import GoogleSignInButton from "./GoogleSignInButton";
+import logo from "../logo.svg";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -22,13 +24,11 @@ function Login() {
 
       const { id, name, email: userEmail, role } = res.data.user;
 
-      // ✅ STORE USER DETAILS
       localStorage.setItem("userId", id);
       localStorage.setItem("userName", name);
       localStorage.setItem("userEmail", userEmail);
       localStorage.setItem("role", role);
 
-      // ✅ REDIRECT BASED ON ROLE
       if (role === "ADMIN") navigate("/admin");
       else if (role === "RECRUITER") navigate("/recruiter");
       else navigate("/user");
@@ -38,30 +38,53 @@ function Login() {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Login</h2>
+    <div className="auth-page">
+      <div className="auth-backdrop-shape auth-backdrop-shape--one" />
+      <div className="auth-backdrop-shape auth-backdrop-shape--two" />
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+      <header className="auth-hero">
+        <div className="auth-logo-ring">
+          <img src={logo} alt="JobSphere Logo" className="auth-logo-img" />
+        </div>
+        <h1>JobSphere</h1>
+        <p>Smart Resume and Job Matching Platform</p>
+      </header>
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <div className="auth-container">
+        <h2>Login</h2>
+        <p className="auth-subtitle">Welcome back. Continue your job journey.</p>
 
-      <button onClick={handleLogin}>Login</button>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <p>
-        New user? <a href="/register">Register here</a>
-      </p>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button onClick={handleLogin}>Login</button>
+
+        <div className="auth-divider"><span>or</span></div>
+        <GoogleSignInButton role="USER" />
+
+        <p>
+          New user? <a href="/register">Register here</a>
+        </p>
+      </div>
+
+      <footer className="auth-footer">
+        <span>� {new Date().getFullYear()} JobSphere</span>
+        <span>Built for students and recruiters</span>
+      </footer>
     </div>
   );
 }
 
 export default Login;
+
