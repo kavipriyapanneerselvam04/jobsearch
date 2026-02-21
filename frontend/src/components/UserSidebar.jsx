@@ -6,10 +6,16 @@ function UserSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const logout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
+//   const logout = () => {
+//   localStorage.clear();
+
+//   // Force hard redirect (kills React state)
+//   window.location.href = "/";
+// };
+const logout = () => {
+  localStorage.clear();
+  navigate("/", { replace: true });
+};
 
   return (
     <motion.aside
@@ -18,7 +24,7 @@ function UserSidebar() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Logo / Title */}
+      {/* Header */}
       <div className="sidebar-header">
         <div className="avatar">👤</div>
         <h3>User Panel</h3>
@@ -38,13 +44,6 @@ function UserSidebar() {
           onClick={() => navigate("/profile")}
         >
           👤 <span>Profile</span>
-        </button>
-
-        <button
-          className={location.pathname === "/settings" ? "active" : ""}
-          onClick={() => navigate("/settings")}
-        >
-          ⚙ <span>Settings</span>
         </button>
       </div>
 

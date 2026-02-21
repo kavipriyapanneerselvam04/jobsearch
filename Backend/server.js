@@ -38,6 +38,11 @@ app.get("/", (req, res) => {
 // 🔹 SWAGGER ROUTE
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+app.use(
+  "/profile",
+  express.static(path.join(__dirname, "src/uploads/profile"))
+);
+
 // 🔹 START SERVER
 const PORT = 5000;
 app.listen(PORT, () => {

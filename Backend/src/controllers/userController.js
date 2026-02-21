@@ -66,3 +66,80 @@ exports.deleteUser = (req, res) => {
     }
   );
 };
+
+const multer = require("multer");
+const path = require("path");
+
+// PROFILE PHOTO STORAGE
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "../uploads/profile"),
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage }).single("photo");
+
+// UPLOAD PROFILE PHOTO
+exports.uploadProfilePhoto = (req, res) => {
+  upload(req, res, err => {
+    if (err) return res.status(400).json(err);
+
+    const { userId } = req.body;
+    if (!req.file) return res.status(400).json({ message: "No file" });
+
+    db.query(
+      "UPDATE users SET profile_photo=? WHERE id=?",
+      [req.file.filename, userId],
+      err => {
+        if (err) return res.status(500).json(err);
+        res.json({ filename: req.file.filename });
+      }
+    );
+  });
+};
+exports.getUserProfile = (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    SELECT 
+      id, name, email, role,
+      profile_photo, dob, father_name, phone, address
+    FROM users
+    WHERE id = ?
+  `;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result[0]);
+  });
+};
+exports.updateProfile = (req, res) => {
+  const { id } = req.params;
+  const { dob, father_name, phone, address } = req.body;
+
+  // MySQL DATE must be YYYY-MM-DD or NULL (empty string causes 500)
+  const normalizedDob =
+    dob && /^\d{4}-\d{2}-\d{2}$/.test(dob) ? dob : null;
+
+  const sql = `
+    UPDATE users
+    SET dob=?, father_name=?, phone=?, address=?
+    WHERE id=?
+  `;
+
+  db.query(
+    sql,
+    [
+      normalizedDob,
+      father_name || null,
+      phone || null,
+      address || null,
+      id,
+    ],
+    (err) => {
+      if (err) return res.status(500).json({ message: "Profile update failed", error: err.message });
+      res.json({ message: "Profile updated" });
+    }
+  );
+};

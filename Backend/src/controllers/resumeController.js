@@ -1,78 +1,75 @@
+
 const db = require("../models/db");
 const multer = require("multer");
 const path = require("path");
 
-// ---------- MULTER CONFIG ----------
+// Store resumes in Backend/src/uploads
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "../uploads"),
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (!file.originalname.endsWith(".pdf")) {
+    if (!file.originalname.toLowerCase().endsWith(".pdf")) {
       return cb(new Error("Only PDF files allowed"));
     }
     cb(null, true);
   },
 }).single("resume");
 
-// ---------- UPLOAD OR UPDATE RESUME ----------
 exports.uploadResume = (req, res) => {
-  upload(req, res, err => {
-    if (err) return res.status(400).json({ message: err.message });
+  upload(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
 
-    const { user_id, skills, experience } = req.body;
-    if (!req.file) {
-      return res.status(400).json({ message: "Resume file missing" });
+    const user_id = req.body?.user_id;
+    const skills = req.body?.skills;
+    const experience = Number(req.body?.experience || 0);
+    const resumeFile = req.file ? req.file.filename : null;
+
+    if (!user_id || !skills) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
     const sql = `
-      INSERT INTO resumes (user_id, skills, experience, resume_file)
+      INSERT INTO resumes (user_id, skills, experience, file_name)
       VALUES (?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         skills = VALUES(skills),
         experience = VALUES(experience),
-        resume_file = VALUES(resume_file)
+        file_name = COALESCE(VALUES(file_name), file_name)
     `;
 
-    db.query(
-      sql,
-      [user_id, skills, experience, req.file.filename],
-      err => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Resume uploaded / updated successfully" });
-      }
-    );
+    db.query(sql, [user_id, skills, experience, resumeFile], (dbErr) => {
+      if (dbErr) return res.status(500).json(dbErr);
+      res.json({ message: "Resume uploaded successfully" });
+    });
   });
 };
 
-
-// ---------- GET USER RESUME ----------
-// exports.getResumeByUser = (req, res) => {
-//   const { userId } = req.params;
-
-//   db.query(
-//     "SELECT * FROM resumes WHERE user_id = ? LIMIT 1",
-//     [userId],
-//     (err, results) => {
-//       if (err) return res.status(500).json(err);
-//       res.json(results[0] || null);
-//     }
-//   );
-// };
 exports.getResumeByUser = (req, res) => {
   const { userId } = req.params;
 
-  db.query(
-    "SELECT * FROM resumes WHERE user_id = ? ORDER BY id DESC LIMIT 1",
-    [userId],
-    (err, results) => {
-      if (err) return res.status(500).json(err);
-      res.json(results[0] || null);
-    }
-  );
+  const sql = `
+    SELECT
+      id,
+      user_id,
+      skills,
+      experience,
+      file_name AS resume_file
+    FROM resumes
+    WHERE user_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+  `;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).json(err);
+    res.json(results[0] || null);
+  });
 };

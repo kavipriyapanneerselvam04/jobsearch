@@ -7,5 +7,9 @@ router.post("/register", c.register);
 router.post("/login", c.login);
 router.get("/all", c.getAllUsers);
 router.delete("/delete/:id", c.deleteUser);
+router.post("/profile-photo", c.uploadProfilePhoto);
+router.get("/profile/:id", c.getUserProfile);
+router.put("/profile/:id", c.updateProfile);
+
 
 module.exports = router;
